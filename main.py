@@ -3,7 +3,7 @@ import pygame, json, sys, os
 
 def init():
     pygame.init()
-    with open(os.path.join("out", "data.json"), 'r') as raw:
+    with open(os.path.join(os.getcwd(), "data.json"), 'r') as raw:
         data = json.load(raw)
     size = data.get("size")
     screen = pygame.display.set_mode(size)
@@ -15,10 +15,12 @@ def main():
     increase = size[1]/480
     white = (255, 255, 255)
     black = (0, 0, 0)
+    blue = (0, 155, 255)
     shapes = {}
     shape = None
-    shape_type = "circle"
+    shape_type = "rectangle"
     shape_color = black
+    select_color = blue
     pressed = False
     font = pygame.font.SysFont("Dejavu Sans Mono", int(25*increase))
     background = white
@@ -43,7 +45,7 @@ def main():
         if move_type == "draw":
             shapes, shape, pressed, move_type, index = check_draw(shapes, shape, shape_type, shape_color, pressed, buttons, move_type, index)
         elif move_type == "edit":
-            move_type, index = check_edit(buttons, move_type, index)
+            move_type, index = check_edit(buttons, shapes, move_type, index, select_color)
         elif move_type == "attr":
             move_type, index = check_attr(buttons, move_type, index)
         load_drawings(screen, shapes, shape, shape_type, shape_color, size)
@@ -65,7 +67,7 @@ def check_draw(shapes, shape, shape_type, shape_color, pressed, buttons, move_ty
                 index = i
         elif event.type == pygame.MOUSEBUTTONUP:
             if shape:
-                shapes[tuple(shape)] = (shape_type, shape_color)
+                shapes[tuple(shape)] = [shape_type, shape_color]
                 shape = None
             pressed = False
         elif pressed:
@@ -75,14 +77,16 @@ def check_draw(shapes, shape, shape_type, shape_color, pressed, buttons, move_ty
                 shape = [position, position]
     return shapes, shape, pressed, move_type, index
 
-def check_edit(buttons, move_type, index):
+def check_edit(buttons, shapes, move_type, index, select_color):
     position = pygame.mouse.get_pos()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             stop()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             move_type, i = check_pressed_buttons(buttons, position, move_type)
-            if i >= 0:
+            if i < 0:
+                shapes = check_click_in_shape(shapes, position, select_color)
+            else:
                 index = i
     return move_type, index
 
@@ -96,6 +100,15 @@ def check_attr(buttons, move_type, index):
             if i >= 0:
                 index = i
     return move_type, index
+
+def check_click_in_shape(shapes, position, select_color):
+    for shapepos in shapes:
+        startpos, endpos = shapepos
+        width_bool = position[0] >= startpos[0] and position[0] <= endpos[0]
+        height_bool = position[1] >= startpos[1] and position[1] <= endpos[1]
+        if width_bool and height_bool:
+            shapes[shapepos] = [shape_type, select_color]
+        return shapes
 
 def check_pressed_buttons(buttons, position, move_type):
     i = 0
