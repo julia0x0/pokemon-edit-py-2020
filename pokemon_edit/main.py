@@ -5,7 +5,7 @@ from pokemon_edit.load import *
 
 def init():
     pygame.init()
-    with open(os.path.join(os.getcwd(), "data.json"), 'r') as raw:
+    with open(os.path.join(os.getcwd(), "saves", "data.json"), 'r') as raw:
         data = json.load(raw)
     size = data.get("size")
     screen = pygame.display.set_mode(size)
