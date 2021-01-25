@@ -9,7 +9,7 @@ class OptionLenException(Exception):
 
 
 class Mode(tuple):
-    def __init__(self, program: Program, sub_modes: tuple, default: Option):
+    def __init__(self, program, sub_modes: tuple, default: Option):
         if len(sub_modes) != 3:
             raise OptionLenException(sub_modes)
         super().__init__(sub_modes)
@@ -25,7 +25,7 @@ class Mode(tuple):
 
 
 class Draw(Mode):
-    def __init__(self, program: Program):
+    def __init__(self, program):
         super().__init__(program, [])
 
     def calculate(self):
